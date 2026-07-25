@@ -145,18 +145,190 @@ export const helpTopics: HelpTopic[] = [
     title: "Generator Evaluation",
     category: "Task 2",
     summary:
-      "Reserved workspace for proving generator quality when adding the penalty for three consecutive night shifts.",
+      "Workspace for proving generator quality when adding the penalty for three consecutive night shifts.",
     whenToUse: [
-      "Compare old and new stochastic generator runs.",
+      "Paste and validate exported scheduling JSON.",
+      "Compare old and new rule variants across several scheduler algorithms.",
       "Review benchmark datasets and penalty breakdowns.",
       "Document statistical validation methodology.",
     ],
     keyDecisions: [
       "Task 2 stays separate from account administration but shares the same internal admin shell.",
-      "The future UI should compare distributions across repeated runs, not single outputs.",
+      "The UI compares distributions across repeated runs, not single outputs.",
+      "Imported datasets are normalized into the same snapshot shape as built-in benchmarks.",
+      "Penalty breakdowns keep existing behavior visible while the new rule is evaluated.",
+      "Algorithm choices show speed, memory, and quality tradeoffs explicitly.",
     ],
     riskNotes: [
       "A stochastic algorithm needs seeded benchmarks, repeated runs, and acceptance thresholds.",
+    ],
+  },
+  {
+    id: "generator-dataset-input",
+    title: "Dataset Input",
+    category: "Task 2",
+    summary:
+      "Validates pasted scheduling exports before they become benchmark inputs for the generator comparison.",
+    whenToUse: [
+      "Paste a SQL or database export for a real scheduling snapshot.",
+      "Check whether workers, requirements, absences, and preferences are structurally valid.",
+      "Turn imported data into the same normalized shape used by built-in benchmarks.",
+    ],
+    keyDecisions: [
+      "Validation happens before running any algorithm so broken data cannot produce misleading results.",
+      "Zod checks the required contract while unknown export fields are tolerated.",
+      "Date references are checked against requirement dates to catch out-of-range worker constraints.",
+    ],
+    riskNotes: [
+      "A valid JSON object is not automatically a meaningful benchmark; missing skills or business rules would still need production mapping.",
+      "Large production exports should move to a backend job instead of blocking the browser thread.",
+    ],
+  },
+  {
+    id: "generator-benchmarks",
+    title: "Benchmark Datasets",
+    category: "Task 2",
+    summary:
+      "Fixed input snapshots used to compare current and candidate generator behavior across realistic scheduling conditions.",
+    whenToUse: [
+      "Switch between baseline, night-heavy, small-team, stress, and imported snapshots.",
+      "Check whether the new penalty works only on easy data or across hard cases.",
+      "Explain which data was used to prove the change.",
+    ],
+    keyDecisions: [
+      "Benchmarks are fixed snapshots, not live mutable customer state.",
+      "Imported datasets appear in the same list as demo datasets so the algorithm path is identical.",
+      "Risk profiles help reviewers understand why one dataset may trade off preferences, coverage, or runtime differently.",
+    ],
+    riskNotes: [
+      "A release decision should include at least one historical case where three consecutive nights occurred.",
+      "Anonymized production snapshots should preserve constraints even when names are removed.",
+    ],
+  },
+  {
+    id: "generator-algorithms",
+    title: "Scheduler Algorithms",
+    category: "Task 2",
+    summary:
+      "Selectable strategies that show the quality, speed, memory, and complexity tradeoffs of the generator approach.",
+    whenToUse: [
+      "Compare greedy construction with local repair and annealing-style search.",
+      "Discuss why the production optimizer should use incremental scoring for local moves.",
+      "Choose which strategy drives the detailed old-vs-new and penalty breakdown panels.",
+    ],
+    keyDecisions: [
+      "Greedy gives a fast initial schedule but can lock in early bad choices.",
+      "Repair accepts only improving moves, which is predictable but can stop in a local minimum.",
+      "Annealing can accept temporary regressions to escape local minima, then keeps the best schedule found.",
+    ],
+    riskNotes: [
+      "Algorithm runtime is browser-scaled in the prototype; production should execute full runs in a backend worker or job queue.",
+      "A better score is useful only if hard constraints and operational gates still pass.",
+    ],
+  },
+  {
+    id: "generator-old-vs-new",
+    title: "Old vs New Algorithm",
+    category: "Task 2",
+    summary:
+      "Primary comparison between the current rule variant and the candidate variant with the three-night penalty enabled.",
+    whenToUse: [
+      "Check whether the selected dataset has already been simulated.",
+      "Compare total penalty, median, p95, three-night blocks, and zero-block run rate.",
+      "Decide whether the candidate result is a likely improvement or needs investigation.",
+    ],
+    keyDecisions: [
+      "The panel uses the last completed simulation, so validating a dataset does not silently replace results.",
+      "Current and candidate are scored with common release criteria so comparison stays fair.",
+      "The decision signal summarizes total penalty movement and zero-three-night improvement.",
+    ],
+    riskNotes: [
+      "Do not compare only one best generated schedule; stochastic generators need repeated-run distributions.",
+      "A lower total penalty does not replace reviewing hard constraints and individual component regressions.",
+    ],
+  },
+  {
+    id: "generator-algorithm-comparison",
+    title: "Algorithm Comparison",
+    category: "Task 2",
+    summary:
+      "Side-by-side view of candidate behavior across scheduler strategies for the currently simulated dataset.",
+    whenToUse: [
+      "Explain how different optimization strategies respond to the same new penalty.",
+      "Compare penalty delta, remaining three-night blocks, and browser runtime.",
+      "Identify whether a quality improvement depends on a slower or more complex algorithm.",
+    ],
+    keyDecisions: [
+      "The selected algorithm controls the detailed panels while the comparison keeps the alternatives visible.",
+      "Runtime is shown as an evaluation signal, not as a production SLA measurement.",
+      "The prototype favors readable algorithms but includes incremental scoring to avoid full rescoring per move.",
+    ],
+    riskNotes: [
+      "A strategy that wins on one benchmark may lose on a stress case.",
+      "Production should validate across multiple seeds before changing default algorithm behavior.",
+    ],
+  },
+  {
+    id: "generator-penalty-breakdown",
+    title: "Penalty Breakdown",
+    category: "Task 2",
+    summary:
+      "Component-level comparison used to prove the new three-night rule improved without hiding regressions elsewhere.",
+    whenToUse: [
+      "Inspect why total penalty changed.",
+      "Check whether overtime, preferences, rest, coverage, or fairness regressed.",
+      "Support a release decision with explicit component tolerances.",
+    ],
+    keyDecisions: [
+      "The new rule is reported separately from existing penalty families.",
+      "Each component has a regression tolerance so review is not based on gut feel.",
+      "Mean component values are shown across repeated runs rather than a single schedule.",
+    ],
+    riskNotes: [
+      "Coverage and infeasibility should be hard gates even if the new night rule improves.",
+      "Tolerance thresholds should be agreed before looking at candidate results.",
+    ],
+  },
+  {
+    id: "generator-validation-methodology",
+    title: "Validation Methodology",
+    category: "Task 2",
+    summary:
+      "Release gates for proving a stochastic generator change is better and operationally safe.",
+    whenToUse: [
+      "Review the answer to the assessment question.",
+      "Confirm seed control, repeated runs, regression thresholds, and runtime budget.",
+      "Decide whether the candidate should pass, be watched, or be blocked.",
+    ],
+    keyDecisions: [
+      "Validation uses paired seeds where possible so current and candidate runs are comparable.",
+      "The candidate must improve three-night blocks on every benchmark, not only on average.",
+      "Existing penalties and runtime have explicit guardrails.",
+    ],
+    riskNotes: [
+      "If a benchmark fails, investigate by dataset, seed, final schedule, and component breakdown.",
+      "Feature-flag rollout is safer because small teams may need account-specific weights.",
+    ],
+  },
+  {
+    id: "generator-engine-model",
+    title: "Engine Model",
+    category: "Task 2",
+    summary:
+      "Technical notes on the browser-local optimizer model and how it maps to a production generator.",
+    whenToUse: [
+      "Explain why the prototype can run locally while production takes about five minutes.",
+      "Discuss algorithm complexity, memory shape, and incremental scoring.",
+      "Separate demo implementation constraints from production architecture.",
+    ],
+    keyDecisions: [
+      "The browser model uses scaled datasets so the page remains interactive.",
+      "Local search updates score deltas for affected workers instead of rescoring the full matrix.",
+      "Production-scale validation should run in backend jobs with persisted inputs and outputs.",
+    ],
+    riskNotes: [
+      "Browser runtime measurements are directional only.",
+      "The real optimizer should persist seeds, input hashes, and run artifacts for auditability.",
     ],
   },
 ];
