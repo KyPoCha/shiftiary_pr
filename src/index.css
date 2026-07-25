@@ -52,6 +52,10 @@ input {
   font: inherit;
 }
 
+textarea {
+  font: inherit;
+}
+
 button {
   cursor: pointer;
 }
@@ -259,6 +263,13 @@ button:disabled {
   margin-bottom: 1.125rem;
 }
 
+.generator-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1.125rem;
+}
+
 .metric-card,
 .panel,
 .account-directory {
@@ -318,7 +329,22 @@ button:disabled {
   min-width: 0;
 }
 
+.generator-layout {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 1.125rem;
+  align-items: start;
+  min-width: 0;
+}
+
+.generator-side-stack {
+  display: grid;
+  gap: 1.125rem;
+  min-width: 0;
+}
+
 .account-workspace > *,
+.generator-layout > *,
 .detail-stack {
   min-width: 0;
 }
@@ -341,6 +367,11 @@ button:disabled {
   align-items: center;
   gap: 0.5rem;
   flex: 0 0 auto;
+}
+
+.panel-title-icon {
+  flex: 0 0 auto;
+  color: var(--color-accent);
 }
 
 .panel-heading h2 {
@@ -382,6 +413,11 @@ small {
   margin-top: 0.875rem;
 }
 
+.benchmark-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
 .account-list-item {
   display: flex;
   width: 100%;
@@ -393,6 +429,40 @@ small {
   background: transparent;
   border: 0.0625rem solid transparent;
   border-radius: 0.5rem;
+}
+
+.benchmark-item {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem;
+  text-align: left;
+  background: transparent;
+  border: 0.0625rem solid var(--color-border-soft);
+  border-radius: 0.5rem;
+}
+
+.benchmark-item:hover,
+.benchmark-item.is-selected {
+  background: var(--color-surface-accent);
+  border-color: var(--color-border);
+}
+
+.benchmark-item strong,
+.benchmark-item span {
+  display: block;
+}
+
+.benchmark-item span {
+  margin-top: 0.1875rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.benchmark-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
 }
 
 .account-list-item:hover,
@@ -691,6 +761,301 @@ small {
   align-items: start;
 }
 
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.algorithm-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.result-column,
+.decision-panel,
+.algorithm-card,
+.method-card {
+  min-width: 0;
+  padding: 0.875rem;
+  border: 0.0625rem solid var(--color-border-soft);
+  border-radius: 0.5rem;
+  background: var(--color-surface-subtle);
+}
+
+.algorithm-card.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-surface-accent);
+}
+
+.pending-run-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+  padding: 0.75rem 0.875rem;
+  border: 0.0625rem solid rgba(107, 74, 0, 0.28);
+  border-radius: 0.5rem;
+  background: var(--badge-warning-bg);
+  color: var(--color-warning);
+}
+
+.pending-run-banner strong {
+  min-width: 0;
+}
+
+.pending-run-banner span {
+  color: var(--color-muted-strong);
+  font-size: 0.8125rem;
+}
+
+.algorithm-card h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.algorithm-card p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.algorithm-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 0.0625rem solid var(--color-border-soft);
+}
+
+.algorithm-facts span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.algorithm-facts strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dataset-import-panel {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.dataset-textarea {
+  min-height: 14rem;
+  max-height: 24rem;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.dataset-input-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.dataset-input-actions .button:first-child {
+  grid-column: 1 / -1;
+}
+
+.dataset-validation {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--color-border-soft);
+  border-radius: 0.5rem;
+  background: var(--color-surface-subtle);
+}
+
+.dataset-validation > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dataset-validation-success {
+  border-color: rgba(23, 105, 170, 0.28);
+  background: var(--color-surface-accent);
+}
+
+.dataset-validation-error {
+  border-color: rgba(122, 31, 43, 0.28);
+  background: #fff7f8;
+}
+
+.dataset-validation-success svg {
+  color: var(--color-accent);
+}
+
+.dataset-validation-error svg {
+  color: var(--color-danger);
+}
+
+.dataset-validation ul {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding-left: 1.125rem;
+  color: var(--color-muted-strong);
+  font-size: 0.8125rem;
+}
+
+.dataset-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.dataset-summary-grid div {
+  min-width: 0;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--color-border-soft);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+}
+
+.dataset-summary-grid span,
+.dataset-summary-grid strong {
+  display: block;
+}
+
+.dataset-summary-grid span {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.dataset-summary-grid strong {
+  margin-top: 0.25rem;
+}
+
+.spin-icon {
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result-column-success {
+  border-color: var(--color-border);
+  background: var(--color-surface-accent);
+}
+
+.result-column > span,
+.decision-panel > span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.result-column > strong,
+.decision-panel > strong {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 1.5rem;
+}
+
+.result-column > small,
+.decision-panel > small {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.result-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin-top: 1rem;
+  padding-top: 0.875rem;
+  border-top: 0.0625rem solid var(--color-border-soft);
+}
+
+.result-facts span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.result-facts strong {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.decision-panel svg {
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+}
+
+.penalty-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.penalty-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, auto);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--color-border-soft);
+  border-radius: 0.5rem;
+  background: var(--color-surface-subtle);
+}
+
+.penalty-row strong,
+.penalty-row small {
+  display: block;
+}
+
+.penalty-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: center;
+  text-align: right;
+}
+
+.penalty-values span {
+  color: var(--color-muted-strong);
+  font-weight: 800;
+}
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.method-card h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.method-card p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
 .policy-list,
 .audit-list {
   display: grid;
@@ -910,6 +1275,7 @@ small {
 @media (max-width: 70rem) {
   .app-shell,
   .account-workspace,
+  .generator-layout,
   .split-grid {
     grid-template-columns: 1fr;
   }
@@ -938,15 +1304,24 @@ small {
 
 @media (max-width: 64rem) {
   .metric-grid,
+  .generator-metric-grid,
   .insight-grid,
   .toggle-summary,
-  .help-topic-grid {
+  .help-topic-grid,
+  .comparison-grid,
+  .algorithm-comparison-grid,
+  .method-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .relationship-grid,
-  .account-facts {
+  .account-facts,
+  .penalty-row {
     grid-template-columns: 1fr;
+  }
+
+  .penalty-values {
+    text-align: left;
   }
 
   .toggle-row {
@@ -989,11 +1364,15 @@ small {
   }
 
   .metric-grid,
+  .generator-metric-grid,
   .relationship-grid,
   .insight-grid,
   .account-facts,
   .toggle-summary,
   .help-topic-grid,
+  .comparison-grid,
+  .algorithm-comparison-grid,
+  .method-grid,
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -1042,6 +1421,19 @@ small {
 
   .segmented-control {
     width: 100%;
+  }
+
+  .penalty-values {
+    grid-template-columns: 1fr;
+  }
+
+  .algorithm-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .pending-run-banner {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

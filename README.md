@@ -19,4 +19,5 @@ npm run build
 
 - [Architecture notes](docs/architecture.md)
 - [Task 1 admin UI](docs/task-1-admin-ui.md)
+- [Task 2 generator validation](docs/task-2-generator-validation.md)
 - [Deployment](docs/deployment.md)

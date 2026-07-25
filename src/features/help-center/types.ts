@@ -6,7 +6,15 @@ export type HelpTopicId =
   | "feature-toggles"
   | "shadow-login"
   | "audit-history"
-  | "generator-evaluation";
+  | "generator-evaluation"
+  | "generator-dataset-input"
+  | "generator-benchmarks"
+  | "generator-algorithms"
+  | "generator-old-vs-new"
+  | "generator-algorithm-comparison"
+  | "generator-penalty-breakdown"
+  | "generator-validation-methodology"
+  | "generator-engine-model";
 
 export type HelpTopic = {
   id: HelpTopicId;
