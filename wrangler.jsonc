@@ -22,7 +22,7 @@
         {
           "binding": "DB",
           "database_name": "rozpis-admin",
-          "database_id": "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID",
+          "database_id": "ad53d8e6-414f-48aa-ace3-de482ca16df8",
           "migrations_dir": "migrations"
         }
       ],

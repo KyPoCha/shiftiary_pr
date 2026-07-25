@@ -11,7 +11,8 @@
     "ci": "npm run build",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply rozpis-admin --local",
-    "db:migrate:remote": "wrangler d1 migrations apply rozpis-admin --remote",
+    "db:migrate:remote": "wrangler d1 migrations apply rozpis-admin --remote --env production",
+    "deploy:worker": "wrangler deploy --env production",
     "deploy:cloudflare": "wrangler pages deploy dist",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"

@@ -2,38 +2,99 @@
 
 ## Target
 
-The current app is a static Vite frontend, so the production target is Cloudflare Pages. The `dev` branch is treated as the production deployment branch for this assessment.
+Production uses two Cloudflare resources:
 
-## GitHub Actions
+- Cloudflare Worker API: D1 persistence and server-side LLM extraction.
+- Cloudflare Pages: static Vite frontend.
 
-Two workflows are configured:
+The production deployment branch is `main`.
 
-- `CI`: runs on pushes and pull requests to `dev` and `main`.
-- `Deploy Cloudflare Pages`: runs on pushes to `dev` and can also be started manually.
+## Cloudflare Setup
 
-Both workflows use Node.js 22 and `npm ci`.
+Create a D1 database:
 
-## Required GitHub Configuration
+```bash
+npx wrangler d1 create rozpis-admin
+```
 
-Create a Cloudflare Pages project first. Configure its production branch as `dev`, otherwise deployments from `dev` can be treated as preview deployments instead of production.
+Copy the returned `database_id` into `wrangler.jsonc`:
 
-Then add these values in GitHub:
+```txt
+env.production.d1_databases[0].database_id
+```
 
-- Repository secret `CLOUDFLARE_API_TOKEN`
-- Repository secret `CLOUDFLARE_ACCOUNT_ID`
-- Repository variable `CLOUDFLARE_PAGES_PROJECT_NAME`
+Apply migrations and deploy the Worker once:
 
-The Cloudflare API token should be scoped only to deploy the selected Pages project/account.
+```bash
+npm run db:migrate:remote
+npm run deploy:worker
+```
 
-## Local Commands
+Then set the Worker secret:
+
+```bash
+npx wrangler secret put OPENAI_API_KEY --env production
+```
+
+`wrangler secret put --env production` expects the Worker `rozpis-admin-api-production` to already exist. If it does not exist yet, deploy the Worker first and then add the secret.
+
+Create a Cloudflare Pages project for the frontend. Use:
+
+```txt
+Build command: npm run build
+Build output directory: dist
+Production branch: main
+```
+
+## GitHub Configuration
+
+Repository secrets:
+
+```txt
+CLOUDFLARE_API_TOKEN
+CLOUDFLARE_ACCOUNT_ID
+```
+
+Repository variables:
+
+```txt
+CLOUDFLARE_PAGES_PROJECT_NAME
+VITE_API_BASE_URL
+```
+
+`VITE_API_BASE_URL` should point to the deployed Worker API, for example:
+
+```txt
+https://rozpis-admin-api-production.<your-subdomain>.workers.dev
+```
+
+The Cloudflare API token needs permission to deploy Workers, deploy Pages, edit Worker secrets, and apply D1 migrations for this account.
+
+## Deploy Flow
+
+After merging `dev` into `main`, the GitHub workflow:
+
+1. Installs dependencies.
+2. Applies remote D1 migrations with `npm run db:migrate:remote`.
+3. Deploys the Worker with `npm run deploy:worker`.
+4. Builds the Vite frontend with `VITE_API_BASE_URL`.
+5. Deploys `dist` to Cloudflare Pages.
+
+## Local Verification Before Merge
 
 ```bash
 npm run build
-npm run deploy:cloudflare -- --project-name <cloudflare-pages-project-name> --branch dev
+npx drizzle-kit check
+```
+
+Optional production dry run:
+
+```bash
+npx wrangler deploy --env production --dry-run
 ```
 
 ## Notes
 
-Runtime data is still mocked in frontend state. When persistence is added later, deployment will need D1 bindings, migrations, and a separate production data setup.
+Do not add `.dev.vars` or `OPENAI_API_KEY` to GitHub variables for the frontend. The OpenAI key belongs only in Worker secrets.
 
 Cloudflare Pages uses `public/_redirects` so direct visits to React routes such as `/help-center` return `index.html`.

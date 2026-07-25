@@ -42,6 +42,20 @@ export default {
         return jsonResponse({}, 204);
       }
 
+      if ((url.pathname === "/" || url.pathname === "/health") && request.method === "GET") {
+        return jsonResponse({
+          ok: true,
+          service: "rozpis-admin-api",
+          environment: env.ENVIRONMENT,
+          endpoints: [
+            "GET /api/admin-data",
+            "PUT /api/admin-data",
+            "POST /api/text-configuration/analyze",
+            "POST /api/text-configuration/apply",
+          ],
+        });
+      }
+
       if (url.pathname === "/api/admin-data" && request.method === "GET") {
         await seedIfEmpty(env);
         return jsonResponse(await readAdminSnapshot(env));
