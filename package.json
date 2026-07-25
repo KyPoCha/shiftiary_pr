@@ -1,0 +1,38 @@
+{
+  "name": "shiftiary-admin-assessment",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "api:dev": "wrangler dev --local --persist-to .wrangler/state --port 8787",
+    "dev": "vite",
+    "dev:full": "node scripts/dev-full.mjs",
+    "build": "tsc --noEmit && vite build",
+    "ci": "npm run build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply rozpis-admin --local",
+    "db:migrate:remote": "wrangler d1 migrations apply rozpis-admin --remote --env production",
+    "deploy:worker": "wrangler deploy --env production",
+    "deploy:cloudflare": "wrangler pages deploy dist",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260724.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "wrangler": "^4.114.0"
+  }
+}

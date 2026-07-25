@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "rozpis-admin-api",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-07-25",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rozpis-admin",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "local",
+    "OPENAI_MODEL": "gpt-4.1-mini"
+  },
+  "env": {
+    "production": {
+      "name": "rozpis-admin-api-production",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "rozpis-admin",
+          "database_id": "ad53d8e6-414f-48aa-ace3-de482ca16df8",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "OPENAI_MODEL": "gpt-4.1-mini"
+      }
+    }
+  }
+}
