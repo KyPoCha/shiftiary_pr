@@ -19,3 +19,4 @@ npm run build
 
 - [Architecture notes](docs/architecture.md)
 - [Task 1 admin UI](docs/task-1-admin-ui.md)
+- [Deployment](docs/deployment.md)

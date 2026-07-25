@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "ci": "npm run build",
+    "deploy:cloudflare": "wrangler pages deploy dist",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
@@ -21,6 +23,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.2",
-    "vite": "^6.0.3"
+    "vite": "^6.0.3",
+    "wrangler": "^4.114.0"
   }
 }
