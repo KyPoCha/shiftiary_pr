@@ -42,6 +42,26 @@ export const helpTopics: HelpTopic[] = [
     ],
   },
   {
+    id: "customer-directory",
+    title: "Customer Directory",
+    category: "Task 1",
+    summary:
+      "Tenant-level selector for switching between hospital customers before working with their department accounts.",
+    whenToUse: [
+      "Find a hospital by name, legal entity, region, or contract tier.",
+      "Switch the account workspace to another customer portfolio.",
+      "Check how many department accounts belong to a customer before opening one.",
+    ],
+    keyDecisions: [
+      "Customers are separated from department accounts because one customer can own multiple operational accounts.",
+      "Search includes legal name and region because support often starts from contract or location context.",
+      "The selected customer controls which account list, metrics, and creation flow are shown.",
+    ],
+    riskNotes: [
+      "Actions should always show both customer and account context so admins do not change the wrong tenant.",
+    ],
+  },
+  {
     id: "account-overview",
     title: "Account Overview",
     category: "Task 1",
@@ -329,6 +349,107 @@ export const helpTopics: HelpTopic[] = [
     riskNotes: [
       "Browser runtime measurements are directional only.",
       "The real optimizer should persist seeds, input hashes, and run artifacts for auditability.",
+    ],
+  },
+  {
+    id: "text-configuration",
+    title: "Text Configuration",
+    category: "Bonus",
+    summary:
+      "Prototype for converting natural-language setup requests into validated account configuration changes.",
+    whenToUse: [
+      "Create or adjust account settings faster than clicking through several forms.",
+      "Explain how LLM extraction and deterministic validation should cooperate.",
+      "Preview exactly what would change before writing to the database.",
+    ],
+    keyDecisions: [
+      "Free text is never saved directly as configuration.",
+      "The LLM produces structured intent; schemas and domain code decide whether it is valid.",
+      "Ambiguous or risky instructions block apply until an admin clarifies the intent.",
+    ],
+    riskNotes: [
+      "Production should persist the original text, structured intent, approved diff, actor, and audit event.",
+      "High-risk settings such as security policy or strict generator rules need role checks and stronger confirmation.",
+    ],
+  },
+  {
+    id: "text-configuration-input",
+    title: "Configuration Text Input",
+    category: "Bonus",
+    summary:
+      "Natural-language entry point for account setup requests such as workers, exports, and generator rules.",
+    whenToUse: [
+      "Paste a customer request or write an internal setup instruction.",
+      "Try known examples before designing a production prompt contract.",
+      "Capture the user's intended change in one place before parsing.",
+    ],
+    keyDecisions: [
+      "The prototype accepts Czech and English keywords for the assessment examples.",
+      "Analyze is explicit so users control when interpretation happens.",
+      "Sample prompts make supported capabilities discoverable without explanatory page text.",
+    ],
+    riskNotes: [
+      "Production should guard against prompt injection and ignore instructions unrelated to account configuration.",
+    ],
+  },
+  {
+    id: "text-configuration-validation",
+    title: "Structured Intent Validation",
+    category: "Bonus",
+    summary:
+      "The structured JSON boundary used to validate model output before building a change preview.",
+    whenToUse: [
+      "Inspect what the system understood from the user's text.",
+      "Check confidence and extracted fields before reviewing the diff.",
+      "Debug why a request produced no changes or required clarification.",
+    ],
+    keyDecisions: [
+      "The Worker uses LLM structured output when configured and deterministic fallback when unavailable.",
+      "Enums and ranges prevent invalid modules, impossible worker counts, or unsupported rules.",
+      "Domain validation can reject combinations that are syntactically valid but operationally risky.",
+    ],
+    riskNotes: [
+      "Structured intent is not the final source of truth; the approved change set is.",
+    ],
+  },
+  {
+    id: "text-configuration-preview",
+    title: "Configuration Preview",
+    category: "Bonus",
+    summary:
+      "Human review step that shows before/after changes before anything is applied.",
+    whenToUse: [
+      "Review feature toggles, worker placeholders, account context, and generator rules.",
+      "Check risk labels before approving a change batch.",
+      "Confirm that high-risk changes were interpreted correctly.",
+    ],
+    keyDecisions: [
+      "Apply is disabled while blocking clarifications or validation messages exist.",
+      "Each change records whether it came from extraction or deterministic transformation.",
+      "Production should write all approved changes in one transaction with an audit event.",
+    ],
+    riskNotes: [
+      "Preview diffs should include inherited settings and permission impact before production launch.",
+    ],
+  },
+  {
+    id: "text-configuration-ambiguity",
+    title: "Ambiguity Handling",
+    category: "Bonus",
+    summary:
+      "Clarification model for vague or risky text that should not be saved automatically.",
+    whenToUse: [
+      "Identify missing target account, vague export module, or unclear night-rule wording.",
+      "Distinguish blocking questions from non-blocking review notes.",
+      "Explain why the system asks follow-up questions instead of guessing.",
+    ],
+    keyDecisions: [
+      "Missing target account and unsupported export references are blocking.",
+      "Large worker creation is non-blocking but still flagged for review.",
+      "Clarifications should become structured answers before the final diff is rebuilt.",
+    ],
+    riskNotes: [
+      "Production should not rely on natural-language clarification text alone; use typed choices.",
     ],
   },
 ];

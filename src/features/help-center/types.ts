@@ -1,5 +1,6 @@
 export type HelpTopicId =
   | "customer-accounts"
+  | "customer-directory"
   | "account-directory"
   | "account-overview"
   | "account-relationships"
@@ -14,12 +15,17 @@ export type HelpTopicId =
   | "generator-algorithm-comparison"
   | "generator-penalty-breakdown"
   | "generator-validation-methodology"
-  | "generator-engine-model";
+  | "generator-engine-model"
+  | "text-configuration"
+  | "text-configuration-input"
+  | "text-configuration-validation"
+  | "text-configuration-preview"
+  | "text-configuration-ambiguity";
 
 export type HelpTopic = {
   id: HelpTopicId;
   title: string;
-  category: "Task 1" | "Task 2" | "Platform";
+  category: "Task 1" | "Task 2" | "Bonus" | "Platform";
   summary: string;
   whenToUse: string[];
   keyDecisions: string[];
