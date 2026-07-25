@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
-import { Activity, Building2, KeyRound, Network, ShieldCheck, ToggleRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Activity, Building2, DatabaseZap, KeyRound, Network, Search, ShieldCheck, ToggleRight } from "lucide-react";
 import { Badge } from "../../../shared/components/Badge";
+import { useAdminData } from "../../../shared/api/adminDataStore";
+import { ContextHelpButton } from "../../help-center/components/ContextHelpButton";
 import { AccountDirectory } from "./AccountDirectory";
 import { AccountInsightsPanel } from "./AccountInsightsPanel";
 import { AccountRelationships } from "./AccountRelationships";
@@ -9,24 +11,23 @@ import { AuditTimeline } from "./AuditTimeline";
 import { FeatureTogglePanel } from "./FeatureTogglePanel";
 import { NewAccountModal, type NewAccountDraft } from "./NewAccountModal";
 import { ShadowLoginPanel } from "./ShadowLoginPanel";
-import {
-  accountGroups as initialAccountGroups,
-  accounts as initialAccounts,
-  auditEvents as initialAuditEvents,
-  customers,
-  featureTogglesByAccount as initialFeatureTogglesByAccount,
-  shadowLoginPolicies as initialShadowLoginPolicies,
-} from "../data/accounts";
-import { AccountSchema, type Account, type AuditEvent, type FeatureToggleState } from "../types";
+import type { Customer, FeatureToggleState } from "../types";
 
 export function CustomerAccountsPage() {
-  const [accountList, setAccountList] = useState(initialAccounts);
-  const [groupList, setGroupList] = useState(initialAccountGroups);
-  const [featureTogglesByAccount, setFeatureTogglesByAccount] = useState(initialFeatureTogglesByAccount);
-  const [shadowLoginPolicies, setShadowLoginPolicies] = useState(initialShadowLoginPolicies);
-  const [accountAuditEvents, setAccountAuditEvents] = useState(initialAuditEvents);
+  const {
+    data,
+    changeToggleState,
+    createAccount,
+    endShadowSession,
+    resetAdminData,
+    setGroupMembership,
+    startShadowSession,
+  } = useAdminData();
+  const { accountGroups: groupList, accounts: accountList, auditEvents: accountAuditEvents, customers, featureTogglesByAccount, shadowLoginPolicies } = data;
   const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState(initialAccounts[0].id);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0].id);
+  const customerAccounts = accountList.filter((account) => account.customerId === selectedCustomerId);
+  const [selectedAccountId, setSelectedAccountId] = useState(customerAccounts[0]?.id ?? accountList[0].id);
   const selectedAccount = accountList.find((account) => account.id === selectedAccountId) ?? accountList[0];
 
   const customer = customers.find((item) => item.id === selectedAccount.customerId) ?? customers[0];
@@ -37,6 +38,14 @@ export function CustomerAccountsPage() {
   const featureToggles = featureTogglesByAccount[selectedAccount.id] ?? [];
   const shadowLoginPolicy = shadowLoginPolicies[selectedAccount.id];
   const selectedAuditEvents = accountAuditEvents.filter((event) => event.accountId === selectedAccount.id);
+
+  useEffect(() => {
+    const nextAccount = accountList.find((account) => account.customerId === selectedCustomerId);
+
+    if (nextAccount && selectedAccount.customerId !== selectedCustomerId) {
+      setSelectedAccountId(nextAccount.id);
+    }
+  }, [accountList, selectedAccount.customerId, selectedCustomerId]);
 
   const portfolioStats = useMemo(() => {
     const customerAccounts = accountList.filter((account) => account.customerId === selectedAccount.customerId);
@@ -52,165 +61,28 @@ export function CustomerAccountsPage() {
     };
   }, [accountList, featureToggles, selectedAccount.customerId, shadowLoginPolicies]);
 
-  function addAuditEvent(event: Omit<AuditEvent, "id" | "createdAt">) {
-    setAccountAuditEvents((currentEvents) => [
-      {
-        ...event,
-        id: `evt-${Date.now().toString(36)}`,
-        createdAt: new Date().toISOString(),
-      },
-      ...currentEvents,
-    ]);
-  }
-
   function handleChangeToggleState(toggleId: string, state: FeatureToggleState) {
-    const toggle = featureToggles.find((item) => item.id === toggleId);
     const inheritedFrom = state === "inherited" ? groups[0]?.name ?? "Customer defaults" : null;
-
-    setFeatureTogglesByAccount((currentToggles) => ({
-      ...currentToggles,
-      [selectedAccount.id]: (currentToggles[selectedAccount.id] ?? []).map((item) =>
-        item.id === toggleId
-          ? {
-              ...item,
-              state,
-              inheritedFrom,
-              updatedAt: new Date().toISOString(),
-              updatedBy: "Current Admin",
-            }
-          : item,
-      ),
-    }));
-
-    addAuditEvent({
-      accountId: selectedAccount.id,
-      actor: "Current Admin",
-      action: `Set ${toggle?.label ?? "feature toggle"} to ${state}`,
-      target: "Feature toggle",
-      severity: toggle?.risk === "high" ? "warning" : "info",
-    });
+    changeToggleState(selectedAccount.id, toggleId, state, inheritedFrom);
   }
 
   function handleSetGroupMembership(groupId: string, shouldJoin: boolean) {
-    const group = groupList.find((item) => item.id === groupId);
-
-    setGroupList((currentGroups) =>
-      currentGroups.map((item) =>
-        item.id === groupId
-          ? {
-              ...item,
-              memberAccountIds: shouldJoin
-                ? Array.from(new Set([...item.memberAccountIds, selectedAccount.id]))
-                : item.memberAccountIds.filter((accountId) => accountId !== selectedAccount.id),
-            }
-          : item,
-      ),
-    );
-
-    setAccountList((currentAccounts) =>
-      currentAccounts.map((account) =>
-        account.id === selectedAccount.id
-          ? {
-              ...account,
-              groupIds: shouldJoin
-                ? Array.from(new Set([...account.groupIds, groupId]))
-                : account.groupIds.filter((item) => item !== groupId),
-            }
-          : account,
-      ),
-    );
-
-    addAuditEvent({
-      accountId: selectedAccount.id,
-      actor: "Current Admin",
-      action: `${shouldJoin ? "Added account to" : "Removed account from"} ${group?.name ?? "group"}`,
-      target: "Account relationship",
-      severity: "info",
-    });
+    setGroupMembership(selectedAccount.id, groupId, shouldJoin);
   }
 
   function handleStartShadowSession(reason?: string) {
-    setShadowLoginPolicies((currentPolicies) => ({
-      ...currentPolicies,
-      [selectedAccount.id]: {
-        ...currentPolicies[selectedAccount.id],
-        activeSessionCount: currentPolicies[selectedAccount.id].activeSessionCount + 1,
-        lastSessionAt: new Date().toISOString(),
-      },
-    }));
-
-    addAuditEvent({
-      accountId: selectedAccount.id,
-      actor: "Current Admin",
-      action: reason
-        ? `Started shadow-login session: ${reason}`
-        : "Started shadow-login session without reason",
-      target: selectedAccount.name,
-      severity: "warning",
-    });
+    startShadowSession(selectedAccount.id, reason);
   }
 
   function handleEndShadowSession() {
-    setShadowLoginPolicies((currentPolicies) => ({
-      ...currentPolicies,
-      [selectedAccount.id]: {
-        ...currentPolicies[selectedAccount.id],
-        activeSessionCount: Math.max(0, currentPolicies[selectedAccount.id].activeSessionCount - 1),
-      },
-    }));
-
-    addAuditEvent({
-      accountId: selectedAccount.id,
-      actor: "Current Admin",
-      action: "Ended shadow-login session",
-      target: selectedAccount.name,
-      severity: "info",
-    });
+    endShadowSession(selectedAccount.id);
   }
 
   function handleCreateAccount(draft: NewAccountDraft) {
-    const accountId = `acct-${slugify(customer.name)}-${slugify(draft.department)}-${Date.now().toString(36)}`;
-    const nextAccount: Account = AccountSchema.parse({
-      id: accountId,
-      customerId: customer.id,
-      name: draft.name,
-      department: draft.department,
-      status: "trial",
-      plan: customer.contractTier === "enterprise" ? "advanced" : "core",
-      timezone: "Europe/Prague",
-      groupIds: [],
-      seats: draft.seats,
-      workers: draft.workers,
-      owner: draft.owner,
-      lastScheduleGeneratedAt: new Date().toISOString(),
-    });
-
-    setAccountList((currentAccounts) => [...currentAccounts, nextAccount]);
-    setFeatureTogglesByAccount((currentToggles) => ({
-      ...currentToggles,
-      [accountId]: createDefaultFeatureToggles(),
-    }));
-    setShadowLoginPolicies((currentPolicies) => ({
-      ...currentPolicies,
-      [accountId]: {
-        accountId,
-        internalAdminsAllowed: true,
-        customerAdminsAllowed: false,
-        reasonRequired: false,
-        maxSessionMinutes: 20,
-        activeSessionCount: 0,
-        lastSessionAt: null,
-      },
-    }));
-    setSelectedAccountId(accountId);
+    const account = createAccount({ ...draft, customerId: customer.id });
+    setSelectedCustomerId(customer.id);
+    setSelectedAccountId(account.id);
     setIsNewAccountModalOpen(false);
-    addAuditEvent({
-      accountId,
-      actor: "Current Admin",
-      action: "Created department account",
-      target: draft.name,
-      severity: "info",
-    });
   }
 
   function scrollToShadowLogin() {
@@ -234,6 +106,10 @@ export function CustomerAccountsPage() {
             <KeyRound aria-hidden="true" size={17} />
             Shadow login
           </button>
+          <button className="button button-secondary" onClick={resetAdminData} type="button">
+            <DatabaseZap aria-hidden="true" size={17} />
+            Reset data
+          </button>
         </div>
       </header>
 
@@ -245,12 +121,25 @@ export function CustomerAccountsPage() {
       </div>
 
       <div className="account-workspace">
-        <AccountDirectory
-          accounts={accountList}
-          customers={customers}
-          selectedAccountId={selectedAccount.id}
-          onSelectAccount={setSelectedAccountId}
-        />
+        <div className="generator-side-stack">
+          <CustomerSelector
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            accountCountByCustomer={Object.fromEntries(
+              customers.map((item) => [
+                item.id,
+                accountList.filter((account) => account.customerId === item.id).length,
+              ]),
+            )}
+            onSelectCustomer={setSelectedCustomerId}
+          />
+          <AccountDirectory
+            accounts={customerAccounts}
+            customers={customers}
+            selectedAccountId={selectedAccount.id}
+            onSelectAccount={setSelectedAccountId}
+          />
+        </div>
 
         <div className="detail-stack">
           <AccountInsightsPanel
@@ -296,44 +185,74 @@ export function CustomerAccountsPage() {
   );
 }
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+function CustomerSelector({
+  customers,
+  selectedCustomerId,
+  accountCountByCustomer,
+  onSelectCustomer,
+}: {
+  customers: Customer[];
+  selectedCustomerId: string;
+  accountCountByCustomer: Record<string, number>;
+  onSelectCustomer: (customerId: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleCustomers = normalizedQuery
+    ? customers.filter((customer) =>
+        [customer.name, customer.legalName, customer.contractTier, customer.region]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery),
+      )
+    : customers;
 
-function createDefaultFeatureToggles() {
-  return [
-    {
-      id: "egje-export",
-      label: "EGJE export",
-      area: "Exports" as const,
-      state: "disabled" as const,
-      inheritedFrom: null,
-      risk: "medium" as const,
-      updatedBy: "System",
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: "generator-v2",
-      label: "Generator V2",
-      area: "Scheduling" as const,
-      state: "disabled" as const,
-      inheritedFrom: null,
-      risk: "high" as const,
-      updatedBy: "System",
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: "customer-shadow-login",
-      label: "Customer shadow login",
-      area: "Security" as const,
-      state: "disabled" as const,
-      inheritedFrom: null,
-      risk: "high" as const,
-      updatedBy: "System",
-      updatedAt: new Date().toISOString(),
-    },
-  ];
+  return (
+    <aside className="account-directory" aria-label="Customer directory">
+      <div className="panel-heading">
+        <div>
+          <h2>Customers</h2>
+          <span>{visibleCustomers.length} of {customers.length} tenants</span>
+        </div>
+        <ContextHelpButton topicId="customer-directory" />
+      </div>
+
+      <label className="search-field">
+        <Search aria-hidden="true" size={16} />
+        <input
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search customer, tier, region"
+          type="search"
+          value={query}
+        />
+      </label>
+
+      <div className="account-list">
+        {visibleCustomers.length ? (
+          visibleCustomers.map((customer) => (
+            <button
+              className={`account-list-item${selectedCustomerId === customer.id ? " is-selected" : ""}`}
+              key={customer.id}
+              onClick={() => onSelectCustomer(customer.id)}
+              type="button"
+            >
+              <div>
+                <strong>{customer.name}</strong>
+                <span>{accountCountByCustomer[customer.id] ?? 0} accounts, {customer.region}</span>
+              </div>
+              <Badge tone={customer.contractTier === "enterprise" ? "success" : customer.contractTier === "pilot" ? "warning" : "info"}>
+                {customer.contractTier}
+              </Badge>
+            </button>
+          ))
+        ) : (
+          <div className="empty-state">
+            <Building2 aria-hidden="true" size={22} />
+            <strong>No customers found</strong>
+            <span>Try a hospital name, tier, or region.</span>
+          </div>
+        )}
+      </div>
+    </aside>
+  );
 }

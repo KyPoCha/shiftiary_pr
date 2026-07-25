@@ -63,6 +63,14 @@ export const ShadowLoginPolicySchema = z.object({
 });
 export type ShadowLoginPolicy = z.infer<typeof ShadowLoginPolicySchema>;
 
+export const GeneratorRuleSchema = z.object({
+  accountId: z.string(),
+  maxConsecutiveNights: z.number().int().min(1).max(5),
+  updatedBy: z.string(),
+  updatedAt: z.string(),
+});
+export type GeneratorRule = z.infer<typeof GeneratorRuleSchema>;
+
 export const AuditEventSchema = z.object({
   id: z.string(),
   accountId: z.string(),

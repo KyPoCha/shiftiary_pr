@@ -5,6 +5,7 @@ import { App } from "./app/App";
 import { AccountsRoute } from "./app/routes/AccountsRoute";
 import { GeneratorEvaluationRoute } from "./app/routes/GeneratorEvaluationRoute";
 import { HelpCenterRoute } from "./app/routes/HelpCenterRoute";
+import { TextConfigurationRoute } from "./app/routes/TextConfigurationRoute";
 import "./index.css";
 
 const router = createBrowserRouter([
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AccountsRoute /> },
       { path: "generator-evaluation", element: <GeneratorEvaluationRoute /> },
+      { path: "text-configuration", element: <TextConfigurationRoute /> },
       { path: "help-center", element: <HelpCenterRoute /> },
     ],
   },

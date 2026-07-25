@@ -1,10 +1,11 @@
-import { BookOpenCheck, ClipboardCheck, Hospital, Settings2 } from "lucide-react";
+import { BookOpenCheck, ClipboardCheck, Hospital, Settings2, WandSparkles } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import type { PropsWithChildren } from "react";
 
 const navItems = [
   { to: "/", label: "Customer Accounts", icon: Hospital },
   { to: "/generator-evaluation", label: "Generator Evaluation", icon: ClipboardCheck },
+  { to: "/text-configuration", label: "Text Configuration", icon: WandSparkles },
   { to: "/help-center", label: "Help Center", icon: BookOpenCheck },
 ];
 
